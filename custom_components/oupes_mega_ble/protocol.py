@@ -1,23 +1,23 @@
-﻿"""BLE protocol constants and packet parser for the OUPES Mega 1.
+"""BLE protocol constants and packet parser for the OUPES Mega 1.
 
 All values here were reverse-engineered from an Android HCI snoop capture
 (btsnoop_hci.log) of the official Cleanergy app.
 """
 
-# â”€â”€ GATT identifiers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# â”€â”€ GATT identifiers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 SERVICE_UUID     = "00001910-0000-1000-8000-00805f9b34fb"
 WRITE_CHAR_UUID  = "00002b11-0000-1000-8000-00805f9b34fb"  # write-without-response
 NOTIFY_CHAR_UUID = "00002b10-0000-1000-8000-00805f9b34fb"  # notify
 
-# â”€â”€ Keepalive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# â”€â”€ Keepalive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Without this the device terminates the session exactly 10 s after last tx.
 
 KEEPALIVE_PKT          = bytes.fromhex("0180030254010000000000000000000000000076")
 KEEPALIVE_FIRST_DELAY  = 6.0   # seconds after init sequence completes
 KEEPALIVE_INTERVAL     = 10.0  # seconds between subsequent keepalives
 
-# â”€â”€ Initialization sequence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# â”€â”€ Initialization sequence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # The 11 packets below are sent to WRITE_CHAR_UUID immediately after
 # subscribing to notifications.  Packet index 6 embeds a per-device token
 # ("bd236b1695") at bytes 4-13; replace this if connecting to a different unit.
@@ -36,7 +36,7 @@ APP_INIT_SEQUENCE = [
     bytes.fromhex("0180020101000000000000000000000000000016"),
 ]
 
-# â”€â”€ Attribute maps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# â”€â”€ Attribute maps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Attr numbers are consistent between BLE and the WiFi/cloud protocol.
 # "bool" attrs are exposed as binary sensors; all others as regular sensors.
 
@@ -93,7 +93,7 @@ EXT_BATTERY_MAP: dict[int, tuple[str, str]] = {
 # Convenience set of attrs that should become binary sensors
 BOOL_ATTRS = {attr for attr, (_, unit) in ATTR_MAP.items() if unit == "bool"}
 
-# â”€â”€ Output bitmask bits (attr 1) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# â”€â”€ Output bitmask bits (attr 1) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Bit positions in the attr-1 bitmask sent by the device and written to control
 # each output independently.  Confirmed by correlating HCI write commands with
 # matching attr-1 notification values in the btsnoop captures.
@@ -382,10 +382,10 @@ def parse_packet_sequence(packets: list[bytearray]) -> dict[int, int]:
     """Reassemble a multi-packet BLE sequence and parse TLVs.
 
     Each 20-byte BLE notification has:
-      byte 0  â€“ fixed header (0x01)
-      byte 1  â€“ pkgSn (low 7 bits = index, bit 7 = last flag)
-      bytes 2â€“18 â€“ payload (TLV data)
-      byte 19 â€“ checksum
+            byte 0  â€“ fixed header (0x01)
+            byte 1  â€“ pkgSn (low 7 bits = index, bit 7 = last flag)
+            bytes 2â€“18 â€“ payload (TLV data)
+            byte 19 â€“ checksum
 
     When a TLV spans the boundary between two packets, parsing each one
     independently truncates it.  This function concatenates the payloads
