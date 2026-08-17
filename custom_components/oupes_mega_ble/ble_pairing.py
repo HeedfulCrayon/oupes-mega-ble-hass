@@ -1,4 +1,4 @@
-﻿"""BLE pairing for OUPES Mega - programs a new device_key over Bluetooth.
+"""BLE pairing for OUPES Mega - programs a new device_key over Bluetooth.
 
 Replicates the exact Cleanergy app pairing protocol (reverse-engineered from
 a bugreport btsnoop HCI capture):
