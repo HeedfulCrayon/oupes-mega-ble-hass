@@ -31,7 +31,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# Attribute groups to poll — same as the proxy server uses.
+# Attribute groups to poll - same as the proxy server uses.
 # Note: setting DPIDs (41, 45, 46, 47, 49, 58, 63) are NOT queryable over WiFi;
 # the device firmware ignores cmd=2 for them (BLE-only).  Settings are written
 # via cmd=3 and the device echoes the value back in the cmd=3 ACK.
@@ -72,7 +72,7 @@ class OUPESWiFiCoordinator(DataUpdateCoordinator[OUPESData]):
             hass,
             _LOGGER,
             name=f"{DOMAIN}_{device_id}",
-            # No polling interval — we push data from the TCP stream.
+            # No polling interval - we push data from the TCP stream.
             update_interval=None,
         )
         self.host = host
@@ -99,7 +99,7 @@ class OUPESWiFiCoordinator(DataUpdateCoordinator[OUPESData]):
         self._stopping = False
         self._pending_commands: list[str] = []
 
-    # ── Public interface ──────────────────────────────────────────────────────
+    # -- Public interface -----------------------------------------------------
 
     def start(self) -> None:
         """Start the persistent TCP connection background task."""
@@ -148,7 +148,7 @@ class OUPESWiFiCoordinator(DataUpdateCoordinator[OUPESData]):
         """Optimistically set an attr in the source-of-truth dict.
 
         Call this before async_write_ha_state() so the optimistic UI state
-        is not overwritten by the next _apply_telemetry → async_set_updated_data
+        is not overwritten by the next _apply_telemetry -> async_set_updated_data
         call (which rebuilds coordinator.data from self._attrs).
         """
         self._attrs[attr] = value
@@ -163,7 +163,7 @@ class OUPESWiFiCoordinator(DataUpdateCoordinator[OUPESData]):
             self.send_command(2, {"attr": attrs})
             await asyncio.sleep(0.1)
 
-    # ── DataUpdateCoordinator override ────────────────────────────────────────
+    # -- DataUpdateCoordinator override ---------------------------------------
 
     async def _async_update_data(self) -> OUPESData:
         """Return a snapshot of the current accumulated data."""
@@ -174,10 +174,10 @@ class OUPESWiFiCoordinator(DataUpdateCoordinator[OUPESData]):
             },
         }
 
-    # ── TCP connection loop ───────────────────────────────────────────────────
+    # -- TCP connection loop --------------------------------------------------
 
     async def _run_connection_loop(self) -> None:
-        """Reconnect loop — runs until stop() is called."""
+        """Reconnect loop - runs until stop() is called."""
         while not self._stopping:
             try:
                 await self._connect_and_run()
@@ -201,7 +201,7 @@ class OUPESWiFiCoordinator(DataUpdateCoordinator[OUPESData]):
             self.host, self.tcp_port,
         )
         try:
-            # 1. Auth (the proxy accepts any token — this step is optional
+            # 1. Auth (the proxy accepts any token - this step is optional
             #    but matches real app behaviour)
             if self.token:
                 self._send_line(f"cmd=auth&token={self.token}")
@@ -217,7 +217,7 @@ class OUPESWiFiCoordinator(DataUpdateCoordinator[OUPESData]):
             )
             await asyncio.sleep(0.3)
 
-            # 3. Send initial attr 84 keepalive — tells the device to start
+            # 3. Send initial attr 84 keepalive - tells the device to start
             #    streaming (same as the BLE KEEPALIVE_PKT: cmd=3, attr 84=1).
             self._send_attr84_keepalive()
             await asyncio.sleep(0.2)
@@ -272,7 +272,7 @@ class OUPESWiFiCoordinator(DataUpdateCoordinator[OUPESData]):
 
             now = time.monotonic()
 
-            # is_online heartbeat — tells the broker (and device) a client
+            # is_online heartbeat - tells the broker (and device) a client
             # is actively watching.  The real app sends this every 5 s;
             # without it the device stops streaming after ~30 s.
             if now - last_is_online >= _IS_ONLINE_INTERVAL:
@@ -281,7 +281,7 @@ class OUPESWiFiCoordinator(DataUpdateCoordinator[OUPESData]):
                 )
                 last_is_online = now
 
-            # Attr 84 keepalive — cmd=3 write of {84:1}, same as BLE.
+            # Attr 84 keepalive - cmd=3 write of {84:1}, same as BLE.
             # The device sends this to the cloud every ~10 s while streaming;
             # sending it TO the device keeps the session alive.
             if now - last_attr84 >= _ATTR84_KEEPALIVE_INTERVAL:
@@ -293,7 +293,7 @@ class OUPESWiFiCoordinator(DataUpdateCoordinator[OUPESData]):
                 self._send_line("cmd=keep")
                 last_keepalive = now
 
-    # ── Line handling ─────────────────────────────────────────────────────────
+    # -- Line handling --------------------------------------------------------
 
     def _handle_line(self, line: str) -> None:
         """Process one received protocol line."""
@@ -360,7 +360,7 @@ class OUPESWiFiCoordinator(DataUpdateCoordinator[OUPESData]):
         }
         self.async_set_updated_data(snapshot)
 
-    # ── Helpers ───────────────────────────────────────────────────────────────
+    # -- Helpers --------------------------------------------------------------
 
     def _send_attr84_keepalive(self) -> None:
         """Send cmd=3 write of attr 84=1 to the device via the broker.

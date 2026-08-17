@@ -1,9 +1,9 @@
-"""OUPES Mega WiFi — SiBo (wp-cn.doiting.com) HTTPS Mock Server.
+"""OUPES Mega WiFi - SiBo (wp-cn.doiting.com) HTTPS Mock Server.
 
 The Cleanergy / OUPES app calls a secondary IoT cloud ("SiBo", at
-wp-cn.doiting.com / 8.135.109.78:443) via HTTPS.  When those calls fail —
+wp-cn.doiting.com / 8.135.109.78:443) via HTTPS.  When those calls fail -
 either because the device IMEI isn't registered with SiBo or because
-configNetToken is stale — the app's ResponseParse fires skipToLogin(true)
+configNetToken is stale - the app's ResponseParse fires skipToLogin(true)
 and shows a "token error" toast, causing an infinite login loop.
 
 This server stubs the SiBo HTTPS endpoints so the app always gets a valid
@@ -16,12 +16,12 @@ Deployment requires your firewall/router to:
 See the README for full Squid + Android CA setup instructions.
 
 SiBo endpoints handled:
-  POST /api/app/temp_user/login          → fake configNetToken
-  GET  /api/v2/app/device_with_group/list → empty groups list (ret:1)
-  POST /api/app/device/info              → empty device info (ret:1)
-  POST /api/app/device/bind / unbind     → ok (ret:1)
-  POST /api/app/temp_user/logout         → ok (ret:1)
-  *    (everything else)                 → {"ret":"1","info":{},"desc":"ok"}
+  POST /api/app/temp_user/login          -> fake configNetToken
+  GET  /api/v2/app/device_with_group/list -> empty groups list (ret:1)
+  POST /api/app/device/info              -> empty device info (ret:1)
+  POST /api/app/device/bind / unbind     -> ok (ret:1)
+  POST /api/app/temp_user/logout         -> ok (ret:1)
+  *    (everything else)                 -> {"ret":"1","info":{},"desc":"ok"}
 """
 from __future__ import annotations
 
@@ -208,7 +208,7 @@ class SiBoClouServerStub:
         return self._dispatch(path, method, body)
 
     def _dispatch(self, path: str, method: str, body: bytes) -> web.Response:
-        # SiBo temp-user login — return a fake configNetToken
+        # SiBo temp-user login - return a fake configNetToken
         if path == "/api/app/temp_user/login" and method == "POST":
             return _sibo_json(_sibo_ok({
                 "token":             "oupes_ha_stub_token",
@@ -222,7 +222,7 @@ class SiBoClouServerStub:
                 "country_number_code": "840",
             }))
 
-        # Device + group list — empty lists mean no SiBo devices; no ret:9
+        # Device + group list - empty lists mean no SiBo devices; no ret:9
         if path in (
             "/api/v2/app/device_with_group/list",
             "/api/app/device_with_group/list",
@@ -248,10 +248,10 @@ class SiBoClouServerStub:
         if path in ("/api/app/temp_user/logout", "/api/app/log_out"):
             return _sibo_json(_sibo_ok({}))
 
-        # Upload SiBo token (profile/upload goes to OUPES server, not here — but stub anyway)
+        # Upload SiBo token (profile/upload goes to OUPES server, not here - but stub anyway)
         if "/profile/upload" in path:
             return _sibo_json(_sibo_ok({}))
 
-        # Any other SiBo path — return success so ResponseParse doesn't fire skipToLogin
+        # Any other SiBo path - return success so ResponseParse doesn't fire skipToLogin
         _LOGGER.debug("SiBo mock: unhandled %s %s — returning stub ok", method, path)
         return _sibo_json(_sibo_ok({}))

@@ -1,4 +1,4 @@
-"""OUPES Mega WiFi — Home Assistant custom integration.
+"""OUPES Mega WiFi - Home Assistant custom integration.
 
 Combines the proxy broker servers (TCP/HTTP/SiBo) with per-device HA entities
 (sensors, switches, numbers).
@@ -70,7 +70,7 @@ PLATFORMS: list[Platform] = [
 ]
 
 
-# ── Registry helpers (same as proxy) ──────────────────────────────────────────
+# -- Registry helpers (same as proxy) -----------------------------------------
 
 
 def _build_device_registry(hass: HomeAssistant) -> dict[str, str]:
@@ -133,7 +133,7 @@ async def _async_update_registries(hass: HomeAssistant) -> None:
         tcp_server.update_device_registry(_build_device_registry(hass))
 
 
-# ── Coordinator factory ───────────────────────────────────────────────────────
+# -- Coordinator factory ------------------------------------------------------
 
 
 def _coordinator_for_subentry(
@@ -185,14 +185,14 @@ def _coordinator_for_subentry(
     )
 
 
-# ── Entry lifecycle ───────────────────────────────────────────────────────────
+# -- Entry lifecycle ----------------------------------------------------------
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Start proxy servers (primary entry) and coordinator for each subentry."""
     hass.data.setdefault(DOMAIN, {})
 
-    # ── 1. Start proxy servers (only for the first / primary entry) ────────
+    # -- 1. Start proxy servers (only for the first / primary entry) --------
     if "proxy" not in hass.data[DOMAIN]:
         port: int = int(
             entry.options.get(CONF_PORT, entry.data.get(CONF_PORT, DEFAULT_PORT))
@@ -278,7 +278,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "primary_entry_id": entry.entry_id,
         }
 
-        # ── Register bind callback — fires when a device calls /api/device/bind
+        # -- Register bind callback - fires when a device calls /api/device/bind
         #    and tells us its product_id.  We update the matching coordinator
         #    so model-specific entity names take effect without a restart, and
         #    persist the product_id to the subentry so it survives HA restarts.
@@ -317,23 +317,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await _async_update_registries(hass)
 
-    # ── 2. Init per-entry data storage ────────────────────────────────────
+    # -- 2. Init per-entry data storage ------------------------------------
     hass.data[DOMAIN][entry.entry_id] = {
-        "coordinators": {},   # subentry_id → OUPESWiFiCoordinator
-        "add_device_fns": {}, # platform_key → Callable[[coordinator, subentry], None]
+        "coordinators": {},   # subentry_id -> OUPESWiFiCoordinator
+        "add_device_fns": {}, # platform_key -> Callable[[coordinator, subentry], None]
         "_cached_options": dict(entry.options),  # snapshot to detect real options changes
     }
 
-    # ── 3. Create coordinators for already-configured subentries ──────────
+    # -- 3. Create coordinators for already-configured subentries ----------
     for subentry in getattr(entry, "subentries", {}).values():
         coordinator = _coordinator_for_subentry(hass, entry, subentry)
         hass.data[DOMAIN][entry.entry_id]["coordinators"][subentry.subentry_id] = coordinator
         coordinator.start()
 
-    # ── 4. Forward platform setups (platforms register their add_device_fns) ─
+    # -- 4. Forward platform setups (platforms register their add_device_fns) -
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    # ── 5. Subscribe to config-entry changes to keep proxy registries fresh ──
+    # -- 5. Subscribe to config-entry changes to keep proxy registries fresh --
     @callback
     def _async_entry_changed(
         change_type: ConfigEntryChange, changed_entry: ConfigEntry
@@ -416,7 +416,7 @@ async def _async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> Non
     """React to config entry changes (options updates, subentry add/remove).
 
     NOTE: add_update_listener fires for ANY config entry mutation, including
-    subentry additions/removals — not just options changes.  We handle each
+    subentry additions/removals - not just options changes.  We handle each
     case differently to avoid a full reload when only subentries changed.
     """
     entry_data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
@@ -428,7 +428,7 @@ async def _async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> Non
         await hass.config_entries.async_reload(entry.entry_id)
         return
 
-    # Options are unchanged — handle subentry additions/removals incrementally
+    # Options are unchanged - handle subentry additions/removals incrementally
     # so that existing coordinators are not disrupted.
     await _async_update_registries(hass)
 

@@ -149,7 +149,7 @@ class OUPESWiFiNumber(
     async def async_added_to_hass(self) -> None:
         """Restore last known setting value on startup.
 
-        Setting DPIDs (41, 45, 46, 47, 49, …) are never echoed in WiFi
+        Setting DPIDs (41, 45, 46, 47, 49, ...) are never echoed in WiFi
         telemetry, so the only way to persist them across HA restarts is to
         restore from the HA state DB.
         """

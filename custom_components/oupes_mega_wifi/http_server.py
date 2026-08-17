@@ -1,12 +1,12 @@
-"""OUPES Mega WiFi — HTTP REST API Intercept Server.
+"""OUPES Mega WiFi - HTTP REST API Intercept Server.
 
 Intercepts Cleanergy app REST API calls and returns responses that redirect
 the app to our local HA TCP broker instead of the OUPES cloud.
 
-Deployment — NAT port-forward (firewall LAN interface):
-  Destination 47.251.27.175 port 80   →  <HA IP>:8897
-  Destination 47.251.14.8  port 9504  →  <HA IP>:8896  (v2 broker, same server)
-  Destination 8.135.109.78 port 80    →  <HA IP>:8897  (SiBo device bind, plain HTTP)
+Deployment - NAT port-forward (firewall LAN interface):
+  Destination 47.251.27.175 port 80   ->  <HA IP>:8897
+  Destination 47.251.14.8  port 9504  ->  <HA IP>:8896  (v2 broker, same server)
+  Destination 8.135.109.78 port 80    ->  <HA IP>:8897  (SiBo device bind, plain HTTP)
 
 Key behaviours:
   - Login response redirects tcp_host / mark.tcpHost to this HA instance's
@@ -79,7 +79,7 @@ def _err(desc: str = "error") -> dict:
 
 
 def _sibo_ok(info: object = None) -> dict:
-    """SiBo envelope — ret is string "1", not integer."""
+    """SiBo envelope - ret is string "1", not integer."""
     return {"ret": "1", "desc": "success", "info": info if info is not None else {}}
 
 
@@ -104,7 +104,7 @@ class OUPESHttpInterceptServer:
 
     Args:
         port:            TCP port for this HTTP server (default 8897).
-        tcp_port:        Port of the local TCP broker — returned to the app
+        tcp_port:        Port of the local TCP broker - returned to the app
                          in login responses so it connects here, not the cloud.
         user_registry:   email -> {passwd: sha256_hex,
                                    devices: [{device_id, device_key}, ...]}
@@ -134,12 +134,12 @@ class OUPESHttpInterceptServer:
         self._tcp_server = tcp_server  # OUPESWiFiProxyServer, for live online status
         self._advertised_host = advertised_host  # explicit override for Docker/proxy setups
         self._runner: web.AppRunner | None = None
-        # token → {email, uid, broker_uid, nickname, mark_token}
+        # token -> {email, uid, broker_uid, nickname, mark_token}
         self._sessions: dict[str, dict] = {}
-        # device_id → full device dict (populated from app's device/sync calls)
+        # device_id -> full device dict (populated from app's device/sync calls)
         self._device_cache: dict[str, dict] = {}
         self._next_uid = 90000
-        # Stable uid per email — survives registry hot-swaps and re-logins
+        # Stable uid per email - survives registry hot-swaps and re-logins
         self._uid_by_email: dict[str, int] = {}
         self._broker_uid_by_email: dict[str, int] = {}
         # Optional callback: called with (device_id, product_id) on device bind.
@@ -386,7 +386,7 @@ class OUPESHttpInterceptServer:
         return result
 
     # ------------------------------------------------------------------
-    # Route handlers  (sync — body already read in _handle)
+    # Route handlers  (sync - body already read in _handle)
     # ------------------------------------------------------------------
 
     def _route_login(self, body: bytes, request: web.Request) -> web.Response:
@@ -449,7 +449,7 @@ class OUPESHttpInterceptServer:
         return self._json(_ok(""))
 
     def _route_register_code(self, body: bytes) -> web.Response:
-        # Pretend to send a verification email — always succeed.
+        # Pretend to send a verification email - always succeed.
         return self._json(_ok(""))
 
     def _route_register(self, body: bytes) -> web.Response:
@@ -615,7 +615,7 @@ class OUPESHttpInterceptServer:
                     session["avatar"] = b["avatar"]
             return self._json(_ok(""))
 
-        # Logoff (account deletion request) — treat same as logout
+        # Logoff (account deletion request) - treat same as logout
         if path == "/api/app/user/logoff" and method == "POST":
             return self._route_logout(body)
 
@@ -625,12 +625,12 @@ class OUPESHttpInterceptServer:
         if path == "/api/app/config/app_version":
             return self._json(_ok(_APP_VERSION_INFO))
         if path == "/api/app/config/platfrom":
-            # Community / platform info — return minimal stub.
+            # Community / platform info - return minimal stub.
             return self._json(_ok({"community": [], "platfrom": []}))
         if path == "/api/app/shop/list":
             return self._json(_ok({"banner": [], "goods": []}))
 
-        # Token refresh — return the same token so the app doesn't crash
+        # Token refresh - return the same token so the app doesn't crash
         if path == "/api/app/refresh/token":
             tok = request.rel_url.query.get("token", "")
             return self._json(_ok({"token": tok}))
@@ -650,7 +650,7 @@ class OUPESHttpInterceptServer:
         if path == "/api/temp_user/login" and method == "POST":
             return self._route_sibo_temp_login()
         if path.startswith("/api/") and "/app/" not in path:
-            # Catch-all for any other SiBo firmware endpoint — return success
+            # Catch-all for any other SiBo firmware endpoint - return success
             _LOGGER.debug("SiBo device endpoint (catch-all): %s %s", method, path)
             return self._json_sibo(_sibo_ok({}))
 

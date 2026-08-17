@@ -3,12 +3,12 @@ from __future__ import annotations
 
 DOMAIN = "oupes_mega_wifi"
 
-# ── Proxy / server constants ──────────────────────────────────────────────────
+# -- Proxy / server constants -------------------------------------------------
 
 # Config entry keys
 CONF_PORT = "port"
 
-# Default TCP port — matches the real cloud broker (47.252.10.9:8896).
+# Default TCP port - matches the real cloud broker (47.252.10.9:8896).
 # DNS-redirect the device's broker hostname to this HA instance so the device
 # connects here instead.
 DEFAULT_PORT = 8896
@@ -49,9 +49,9 @@ CONF_DEBUG_RAW_LINES = "debug_raw_lines"   # log every raw RX/TX protocol line
 CONF_DEBUG_TELEMETRY = "debug_telemetry"   # log parsed cmd=10 telemetry objects
 CONF_DEBUG_HTTP = "debug_http"             # log every intercepted HTTP request
 
-# ── Coordinator / entity constants ────────────────────────────────────────────
+# -- Coordinator / entity constants -------------------------------------------
 
-# Config entry option key — user-settable upper bound (minutes) for runtime attrs
+# Config entry option key - user-settable upper bound (minutes) for runtime attrs
 # (attr 30 and attr 78). Values above this are filtered as firmware noise.
 CONF_RUNTIME_MAX = "runtime_max_minutes"
 
@@ -62,7 +62,7 @@ ATTR78_RUNTIME_MAX = 5940  # 99 h
 # Telemetry attribute set for expansion-battery slot data.
 EXT_BATTERY_ATTRS: frozenset[int] = frozenset({53, 54, 78, 79, 80})
 
-# ── Product model catalog ─────────────────────────────────────────────────────
+# -- Product model catalog ----------------------------------------------------
 
 MODEL_CATALOG: dict[str, tuple[str, str]] = {
     "O44A5o": ("Mega 1",        "mega_1"),
@@ -101,8 +101,8 @@ def series_from_product_id(product_id: str | None) -> str:
     return "unknown"
 
 
-# ── Per-series supported settings ─────────────────────────────────────────────
-# Maps series key → set of setting DPID numbers the series is known to support.
+# -- Per-series supported settings --------------------------------------------
+# Maps series key -> set of setting DPID numbers the series is known to support.
 # Source: StandByTimeoutFragment, ECOFragment, S2_V2SettingFragment, etc.
 # in the decompiled Cleanergy APK.
 #
@@ -143,8 +143,8 @@ _EXODUS_SETTINGS: frozenset[int] = frozenset({
 SERIES_SETTINGS: dict[str, frozenset[int]] = {
     # mega_1 uses the same settings as mega but is a separate key so that
     # binary_sensor.py / switch.py can give bit2 a different name:
-    #   mega_1 → "USB Output"  (bit2 is USB-A/C only, no Anderson port)
-    #   mega   → "Anderson & USB Output"  (bit2 controls Anderson+USB together)
+    #   mega_1 -> "USB Output"  (bit2 is USB-A/C only, no Anderson port)
+    #   mega   -> "Anderson & USB Output"  (bit2 controls Anderson+USB together)
     "mega_1":   _MEGA_SETTINGS,
     "mega":     _MEGA_SETTINGS,
     "exodus":   _EXODUS_SETTINGS,

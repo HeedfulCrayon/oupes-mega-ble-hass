@@ -220,7 +220,7 @@ class OUPESMegaWiFiConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class OUPESMegaWiFiOptionsFlow(config_entries.OptionsFlow):
-    """Options flow � change port or validation modes."""
+    """Options flow - change port or validation modes."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         self._entry = config_entry
@@ -321,7 +321,7 @@ class OUPESDeviceSubentryFlow(ConfigSubentryFlow):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Entry point � check for existing oupes_mega BLE entries first."""
+        """Entry point - check for existing oupes_mega BLE entries first."""
         ble_entries = self.hass.config_entries.async_entries(_OUPES_MEGA_DOMAIN)
         device_registry = dr.async_get(self.hass)
         
@@ -368,7 +368,7 @@ class OUPESDeviceSubentryFlow(ConfigSubentryFlow):
                         break
                 return await self.async_step_credentials()
 
-        # Always show the selection form � HA frontend requires the first step
+        # Always show the selection form - HA frontend requires the first step
         # to return a form (direct redirects cause a blank dialog).
         options: list[dict] = [
             {"value": _SOURCE_GENERATE, "label": "Generate new device key (based on User ID)"},
@@ -408,7 +408,7 @@ class OUPESDeviceSubentryFlow(ConfigSubentryFlow):
         try:
             from homeassistant.components.bluetooth import async_discovered_service_info
         except ImportError:
-            # Bluetooth integration not available � skip discovery
+            # Bluetooth integration not available - skip discovery
             return await self.async_step_credentials()
         
         if user_input is not None:
@@ -651,7 +651,7 @@ class OUPESDeviceSubentryFlow(ConfigSubentryFlow):
     async def async_step_pairing_complete(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Pairing succeeded � save the entry."""
+        """Pairing succeeded - save the entry."""
         title = self._device_name_save if self._device_name_save else self._device_id_save
         return self.async_create_entry(
             title=title,

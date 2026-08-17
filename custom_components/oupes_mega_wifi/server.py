@@ -5,26 +5,26 @@ hostname (resolved during provisioning) to this HA instance so the device
 connects here instead.
 
 Protocol summary (text-based, line-terminated with \\r\\n):
-  Device → server (confirmed via pfSense PCAP 2026-04-13):
+  Device -> server (confirmed via pfSense PCAP 2026-04-13):
     cmd=subscribe&from=device&topic=control_<id>&device_id=<id>&device_key=<key>
     cmd=keep&device_id=<id>&device_key=<key>
     cmd=ping                         (device heartbeat, ~every 90 s)
     cmd=publish&topic=device_<id>&device_id=<id>&device_key=<key>&message=<json>
 
-  App → server:
+  App -> server:
     cmd=auth&token=<token>
     cmd=subscribe&topic=device_<id>&from=control&device_id=<id>&device_key=<key>
     cmd=keep                         (client keepalive)
     cmd=is_online&device_id=<id>
     cmd=publish&...&message=<json>   (cmd=2 telemetry request)
 
-  Server → device/app:
+  Server -> device/app:
     cmd=subscribe&topic=<echoed_topic>&res=1
     cmd=pong&res=1
     cmd=keep&timestamp=<unix_seconds>&res=1
     cmd=publish&res=1&num=1          (ACK a publish)
 
-  Server → device (telemetry request):
+  Server -> device (telemetry request):
     cmd=publish&device_id=<id>&topic=control_<id>&device_key=<key>&message=<json>
     where <json> = {"msg":{"attr":[...]},"pv":0,"cmd":2,"sn":"<ts_ms>"}
 
@@ -49,7 +49,7 @@ from .const import VALIDATION_ACCEPT_ALL, VALIDATION_ACCEPT_REGISTERED, VALIDATI
 
 _LOGGER = logging.getLogger(__name__)
 
-# Attribute groups to poll — same as the cloud client example in the debug docs.
+# Attribute groups to poll - same as the cloud client example in the debug docs.
 # Note: setting DPIDs (41, 45, 46, 47, 49, 58, 63) are NOT queryable over WiFi;
 # the device firmware ignores cmd=2 for them (BLE-only).  Setting values are
 # echoed back only when written via cmd=3.
@@ -129,7 +129,7 @@ class _DeviceSession:
             loop = asyncio.get_running_loop()
             loop.run_in_executor(None, self._debug_write_sync, record)
         except RuntimeError:
-            # No running loop (unlikely) — fall back to synchronous write.
+            # No running loop (unlikely) - fall back to synchronous write.
             self._debug_write_sync(record)
 
     def _debug_write_sync(self, record: dict) -> None:
@@ -153,8 +153,8 @@ class _DeviceSession:
 
         The OUPES Mega only sends telemetry while it believes an active client
         is watching.  The real app signals this via:
-          • cmd=is_online  — every ~5 s
-          • cmd=3 attr 84=1 — every ~10 s  (same as BLE KEEPALIVE_PKT)
+          - cmd=is_online  - every ~5 s
+          - cmd=3 attr 84=1 - every ~10 s  (same as BLE KEEPALIVE_PKT)
 
         We send both directly from the proxy server so the device always
         streams, regardless of whether a coordinator client is connected.
@@ -177,12 +177,12 @@ class _DeviceSession:
 
             now = time.monotonic()
 
-            # ── is_online keepalive ────────────────────────────────────────
+            # -- is_online keepalive ----------------------------------------
             if now - last_is_online >= _IS_ONLINE_INTERVAL:
                 self._send(f"cmd=is_online&device_id={self._device_id}")
                 last_is_online = now
 
-            # ── attr-84 keepalive (triggers continuous telemetry) ──────────
+            # -- attr-84 keepalive (triggers continuous telemetry) ----------
             if now - last_attr84 >= _ATTR84_INTERVAL:
                 ka_msg = json.dumps({
                     "msg": {"attr": [84], "data": {"84": 1}},
@@ -199,7 +199,7 @@ class _DeviceSession:
                 )
                 last_attr84 = now
 
-            # ── attr-group polling (every _POLL_INTERVAL seconds) ─────────
+            # -- attr-group polling (every _POLL_INTERVAL seconds) ---------
             if now - last_poll >= _POLL_INTERVAL:
                 for attrs in _ATTR_GROUPS:
                     msg = json.dumps({
@@ -320,7 +320,7 @@ class _DeviceSession:
                         f"&message={q_msg}"
                     )
             elif from_field != "device" and device_id:
-                # Client-side session — don't pollute _connected_devices.
+                # Client-side session - don't pollute _connected_devices.
                 # But DO notify the device that a client just subscribed.
                 control_topic = f"control_{device_id}"
                 for dev_sess in self._topic_subs.get(control_topic, []):
@@ -362,7 +362,7 @@ class _DeviceSession:
             # ACK the publish so the device considers it delivered.
             self._send("cmd=publish&res=1&num=1")
 
-            # ── Route the message to all sessions subscribed to this topic ──
+            # -- Route the message to all sessions subscribed to this topic --
             if topic:
                 subscribers = self._topic_subs.get(topic, [])
                 for sub in subscribers:
@@ -494,7 +494,7 @@ class OUPESWiFiProxyServer:
         # Maps topic -> list of sessions subscribed to that topic.
         self._topic_subscriptions: dict[str, list[_DeviceSession]] = {}
 
-    # Grace period (seconds) — device still reports online after disconnect.
+    # Grace period (seconds) - device still reports online after disconnect.
     ONLINE_GRACE_PERIOD = 300  # 5 minutes
 
     def is_device_online(self, device_id: str) -> bool:
