@@ -27,46 +27,6 @@ The BLE integration can be installed through HACS as a custom repository. Add
 `https://github.com/HeedfulCrayon/oupes-mega-ble-hass` in **HACS → Integrations
 → Custom repositories**, select **Integration**, and install **OUPES Mega BLE**.
 
-### 2. WiFi (`oupes_mega_wifi`)
-
-**Merged WiFi integration** — intercepts the device's outbound connection to the
-OUPES cloud broker, serves it locally, and exposes WiFi telemetry as HA entities.
-
-- TCP broker proxy (port 8896) — device connects here instead of the cloud
-- HTTP API emulator (port 8897) — handles Cleanergy app REST calls
-- SiBo HTTPS stub (port 8898) — prevents app "token error" login loops
-- Push-based telemetry (no polling) — entities update in real time
-- Same sensors as BLE (battery, power, temperature, runtime)
-- Output control via TCP commands
-- Requires firewall NAT rules to redirect device/app traffic
-
-**[Full documentation →](custom_components/oupes_mega_wifi/README.md)**
-
----
-
-## Which should I use?
-
-| Scenario | Install |
-|----------|---------|
-| Simple local-only setup, device within BLE range | `oupes_mega_ble` only |
-| Device too far for BLE, or you want WiFi telemetry | `oupes_mega_wifi` |
-| Want both channels for redundancy | Both |
-
-**BLE is the easiest path.** It works entirely over Bluetooth with zero network
-configuration — no firewall rules, no port forwarding, no DNS tricks. Just plug
-in a USB Bluetooth adapter (or use ESPHome BLE Proxy) and go.
-
-**WiFi requires network-level redirection.** The device firmware hardcodes the
-cloud broker IP (`47.252.10.9`), so you need firewall NAT rules
-to intercept the device's outbound connections and redirect them to your HA
-instance. This is more powerful (push-based, real-time data, works at any
-distance) but involves a more complex setup. See the
-[WiFi README](custom_components/oupes_mega_wifi/README.md) for the
-full NAT rule table.
-
-The BLE and WiFi integrations can run simultaneously — they use independent
-communication channels and create separate device/entity sets.
-
 ---
 
 ## Quick Start (BLE)
@@ -77,14 +37,6 @@ communication channels and create separate device/entity sets.
 3. Power on the OUPES device and press the IoT button (indicator flashes).
 4. HA auto-discovers the device — click the notification to set up.
 5. Choose **Create New Key** (factory-reset the device first: hold IoT 5 s).
-
-## Quick Start (WiFi)
-
-1. Copy `custom_components/oupes_mega_wifi/` into your HA config directory.
-2. Restart Home Assistant.
-3. Add the **OUPES Mega WiFi** integration — configure ports.
-4. Set up NAT rules on your firewall/router to redirect `47.252.10.9:8896` → HA.
-5. Log in to discover devices.
 
 ---
 
